@@ -1,34 +1,48 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import dotenv from "dotenv";
 import axios from "axios";
 import Form from "./Form";
 
 dotenv.config();
 
-function Fetchweather() {
-  const [weather, setWeather] = useState("");
+function FetchWeather() {
   const [displayedWeather, setDisplayedWeather] = useState("");
+  const [city, setCity] = useState("");
 
   const fetchData = async () => {
-    const response = await axios
-      .get(`${process.env.REACT_APP_BASE_URL}${process.env.REACT_API_KEY}`)
-      .then((res) => res.json())
-      .catch((error) => console.error(`Error: Try again ${error}`));
+    // create an if statement
+    if (!city) return; // if city is empty dont do anything
 
-    setWeather(response);
-    setDisplayedWeather(response);
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_BASE_URL}?q=${city}&appid=${process.env.REACT_APP_API_KEY}`
+      );
+
+      setDisplayedWeather(response.data);
+    } catch (error) {
+      console.error(`Error: Try again ${error}`);
+    }
   };
-  console.log(weather);
-  useEffect(() => {
-    fetchData();
-  }, []);
+
+  // useEffect(() => {
+  //   fetchData();
+  // }, []);
 
   return (
     <div>
-      <Form getWeather={setWeather} />
+      <Form
+        onSubmit={(e) => {
+          e.preventDefault();
+          fetchData();
+        }}
+        onChange={(e) => {
+          setCity(e.target.value); // when user submits it will fetch the data for city
+        }}
+        value={city}
+      />
       {JSON.stringify(displayedWeather)}
     </div>
   );
 }
 
-export default Fetchweather;
+export default FetchWeather;
